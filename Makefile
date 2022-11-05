@@ -60,7 +60,6 @@ clean:
 fclean:		clean
 			@$(RM) $(CLIENT) $(SERVER)
 			@$(RM) $(CLIENT_B) $(SERVER_B)
-			@$(MAKE) fclean -C $(LIBFT_DIR)
 
 re:			fclean all
 
