@@ -1,0 +1,11 @@
+*
+!*/
+!*.*
+!Makefile
+*.o*
+.DS_STORE
+*dSYM*
+*.a
+main.c
+libft/libft.a
+libft/build
