@@ -6,7 +6,7 @@
 /*   By: dwuthric <dwuthric@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/01 10:54:15 by dwuthric          #+#    #+#             */
-/*   Updated: 2022/11/04 11:38:28 by dwuthric         ###   ########.fr       */
+/*   Updated: 2022/11/05 14:48:49 by dwuthric         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static void	send_byte(int pid, char data)
 		else
 			kill(pid, SIGUSR2);
 		data <<= 1;
-		usleep(100);
+		usleep(50);
 	}
 }
 

@@ -6,18 +6,19 @@
 /*   By: dwuthric <dwuthric@student.42lausanne.c    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 10:48:16 by dwuthric          #+#    #+#             */
-/*   Updated: 2022/11/04 11:51:52 by dwuthric         ###   ########.fr       */
+/*   Updated: 2022/11/05 14:48:36 by dwuthric         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/minitalk.h"
 
-void	reset(int *rcv_bytes, int *data_len, char **data)
+void	reset(t_packet *packet)
 {
-	*rcv_bytes = 0;
-	*data_len = 0;
-	free(*data);
-	*data = NULL;
+	packet->rcv_bytes = 0;
+	packet->data_len = 0;
+	free(packet->data);
+	packet->data = NULL;
+	packet->s_pid = 0;
 }
 
 static void	read_byte(int bit, char *data, int *rcv_bytes)
@@ -36,27 +37,29 @@ static void	read_byte(int bit, char *data, int *rcv_bytes)
 
 static void	server_handler(int signum, siginfo_t *info, void *ucontext)
 {
-	static int	rcv_bytes;
-	static int	data_len;
-	static char	*data;
+	static t_packet	packet;
 
 	(void)ucontext;
-	if (rcv_bytes < 4)
-		read_byte(signum, ((char *)&data_len) + rcv_bytes, &rcv_bytes);
+	if (!packet.s_pid && info->si_pid)
+		packet.s_pid = info->si_pid;
+	if (!info->si_pid || info->si_pid != packet.s_pid)
+		return ;
+	if (packet.rcv_bytes < 4)
+		read_byte(signum, ((char *)&packet.data_len) + packet.rcv_bytes, &packet.rcv_bytes);
 	else
 	{
-		if (!data)
+		if (!packet.data)
 		{
-			data = malloc(sizeof(*data) * (data_len + 1));
-			if (!data)
+			packet.data = malloc(sizeof(*packet.data) * (packet.data_len + 1));
+			if (!packet.data)
 				return ;
 		}
-		read_byte(signum, data + rcv_bytes - 4, &rcv_bytes);
-		if (rcv_bytes - 4 == data_len)
+		read_byte(signum, packet.data + packet.rcv_bytes - 4, &packet.rcv_bytes);
+		if (packet.rcv_bytes - 4 == packet.data_len)
 		{
-			write(STDOUT_FILENO, data, ft_strlen(data));
-			kill(info->si_pid, SIGUSR1);
-			reset(&rcv_bytes, &data_len, &data);
+			write(STDOUT_FILENO, packet.data, ft_strlen(packet.data));
+			kill(packet.s_pid, SIGUSR1);
+			reset(&packet);
 		}
 	}
 }
